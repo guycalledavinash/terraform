@@ -1,0 +1,10 @@
+aws_region          = "us-east-1"
+project_name        = "policy-reporter-rt"
+environment         = "dev"
+container_image     = "ghcr.io/kyverno/policy-reporter:latest"
+desired_count       = 2
+min_capacity        = 2
+max_capacity        = 6
+availability_zones  = ["us-east-1a", "us-east-1b"]
+public_subnet_cidrs = ["10.42.1.0/24", "10.42.2.0/24"]
+private_subnet_cidrs = ["10.42.11.0/24", "10.42.12.0/24"]
