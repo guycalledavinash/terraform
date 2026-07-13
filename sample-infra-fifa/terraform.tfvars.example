@@ -1,0 +1,10 @@
+aws_region            = "us-east-1"
+project_name          = "goalhub-fifa"
+environment           = "season"
+frontend_image        = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/goalhub-frontend:latest"
+backend_image         = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/goalhub-backend:latest"
+database_password     = "replace-with-a-strong-secret"
+jwt_secret            = "replace-with-a-long-random-secret"
+allowed_cidr_blocks   = ["0.0.0.0/0"]
+frontend_desired_count = 2
+backend_desired_count  = 2
