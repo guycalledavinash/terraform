@@ -1,0 +1,8 @@
+aws_region                  = "us-east-1"
+project_name                = "infra-demo-aug-10"
+environment                 = "demo"
+allowed_http_cidr_blocks    = ["0.0.0.0/0"]
+instance_type               = "t3.micro"
+database_instance_class     = "db.t4g.micro"
+enable_deletion_protection  = true
+# app_artifact_bucket_name  = "my-globally-unique-three-tier-artifacts"
