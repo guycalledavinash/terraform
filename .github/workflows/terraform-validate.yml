@@ -1,0 +1,62 @@
+name: Terraform validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    name: Check Terraform formatting
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: "true"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive
+
+  validate:
+    name: Validate ${{ matrix.working-directory }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        working-directory:
+          - airbnb-infra-spoof/environments/dev
+          - infra-demo-aug-10
+          - sample-infra-fifa
+          - sample-infra/test-5-apr-25
+          - terraform-basic
+    env:
+      TF_IN_AUTOMATION: "true"
+      AWS_EC2_METADATA_DISABLED: "true"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Initialize Terraform
+        working-directory: ${{ matrix.working-directory }}
+        run: terraform init -backend=false
+
+      - name: Validate Terraform configuration
+        working-directory: ${{ matrix.working-directory }}
+        run: terraform validate
