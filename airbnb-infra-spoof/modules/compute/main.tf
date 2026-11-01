@@ -5,6 +5,7 @@ locals {
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/aws/ecs/${var.name}-${var.environment}"
   retention_in_days = 30
+  kms_key_id        = var.kms_key_arn
   tags              = local.common_tags
 }
 
@@ -76,9 +77,9 @@ resource "aws_lb_listener_rule" "api" {
 }
 
 resource "aws_iam_role" "execution" {
-  name = "${var.name}-${var.environment}-ecs-execution"
+  name               = "${var.name}-${var.environment}-ecs-execution"
   assume_role_policy = jsonencode({ Version = "2012-10-17", Statement = [{ Action = "sts:AssumeRole", Effect = "Allow", Principal = { Service = "ecs-tasks.amazonaws.com" } }] })
-  tags = local.common_tags
+  tags               = local.common_tags
 }
 
 resource "aws_iam_role_policy_attachment" "execution" {
@@ -93,8 +94,8 @@ resource "aws_ecs_task_definition" "api" {
   cpu                      = 512
   memory                   = 1024
   execution_role_arn       = aws_iam_role.execution.arn
-  container_definitions = jsonencode([{ name = "api", image = var.api_image, essential = true, portMappings = [{ containerPort = 8080, protocol = "tcp" }], environment = [{ name = "DATABASE_HOST", value = var.database_endpoint }, { name = "REDIS_HOST", value = var.redis_endpoint }, { name = "OPENSEARCH_ENDPOINT", value = var.opensearch_endpoint }, { name = "MEDIA_BUCKET", value = var.media_bucket_name }], logConfiguration = { logDriver = "awslogs", options = { awslogs-group = aws_cloudwatch_log_group.ecs.name, awslogs-region = data.aws_region.current.name, awslogs-stream-prefix = "api" } } }])
-  tags = local.common_tags
+  container_definitions    = jsonencode([{ name = "api", image = var.api_image, essential = true, portMappings = [{ containerPort = 8080, protocol = "tcp" }], environment = [{ name = "DATABASE_HOST", value = var.database_endpoint }, { name = "REDIS_HOST", value = var.redis_endpoint }, { name = "OPENSEARCH_ENDPOINT", value = var.opensearch_endpoint }, { name = "MEDIA_BUCKET", value = var.media_bucket_name }], logConfiguration = { logDriver = "awslogs", options = { awslogs-group = aws_cloudwatch_log_group.ecs.name, awslogs-region = data.aws_region.current.name, awslogs-stream-prefix = "api" } } }])
+  tags                     = local.common_tags
 }
 
 resource "aws_ecs_task_definition" "web" {
@@ -104,8 +105,8 @@ resource "aws_ecs_task_definition" "web" {
   cpu                      = 256
   memory                   = 512
   execution_role_arn       = aws_iam_role.execution.arn
-  container_definitions = jsonencode([{ name = "web", image = var.web_image, essential = true, portMappings = [{ containerPort = 3000, protocol = "tcp" }], environment = [{ name = "API_BASE_URL", value = "/api" }], logConfiguration = { logDriver = "awslogs", options = { awslogs-group = aws_cloudwatch_log_group.ecs.name, awslogs-region = data.aws_region.current.name, awslogs-stream-prefix = "web" } } }])
-  tags = local.common_tags
+  container_definitions    = jsonencode([{ name = "web", image = var.web_image, essential = true, portMappings = [{ containerPort = 3000, protocol = "tcp" }], environment = [{ name = "API_BASE_URL", value = "/api" }], logConfiguration = { logDriver = "awslogs", options = { awslogs-group = aws_cloudwatch_log_group.ecs.name, awslogs-region = data.aws_region.current.name, awslogs-stream-prefix = "web" } } }])
+  tags                     = local.common_tags
 }
 
 resource "aws_ecs_service" "api" {

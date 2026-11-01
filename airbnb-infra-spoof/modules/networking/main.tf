@@ -14,6 +14,13 @@ resource "aws_vpc" "this" {
   tags = merge(local.common_tags, { Name = "${var.name}-${var.environment}-vpc" })
 }
 
+resource "aws_default_security_group" "default" {
+  vpc_id  = aws_vpc.this.id
+  ingress = []
+  egress  = []
+  tags    = merge(local.common_tags, { Name = "${var.name}-${var.environment}-default-sg" })
+}
+
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
   tags   = merge(local.common_tags, { Name = "${var.name}-${var.environment}-igw" })
@@ -24,7 +31,7 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.this.id
   cidr_block              = var.public_subnet_cidrs[count.index]
   availability_zone       = var.availability_zones[count.index]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = merge(local.common_tags, {
     Name = "${var.name}-${var.environment}-public-${count.index + 1}"

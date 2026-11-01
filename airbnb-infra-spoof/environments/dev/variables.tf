@@ -1,36 +1,36 @@
 variable "aws_region" {
-  type = string
+  type    = string
   default = "us-east-1"
 }
 variable "name" {
-  type = string
+  type    = string
   default = "airbnb-infra-spoof"
 }
 variable "environment" {
-  type = string
+  type    = string
   default = "dev"
 }
 variable "vpc_cidr" {
-  type = string
+  type    = string
   default = "10.42.0.0/16"
 }
 variable "availability_zones" {
-  type = list(string)
+  type    = list(string)
   default = ["us-east-1a", "us-east-1b"]
 }
 variable "api_image" {
-  type = string
+  type    = string
   default = "public.ecr.aws/nginx/nginx:latest"
 }
 variable "web_image" {
-  type = string
+  type    = string
   default = "public.ecr.aws/nginx/nginx:latest"
 }
 variable "db_username" {
-  type = string
+  type    = string
   default = "airbnb_app"
 }
 variable "db_password" {
-  type = string
+  type      = string
   sensitive = true
 }
