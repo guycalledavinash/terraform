@@ -50,21 +50,22 @@ module "data" {
 }
 
 module "compute" {
-  source                = "../../modules/compute"
-  name                  = var.name
-  environment           = var.environment
-  vpc_id                = module.networking.vpc_id
-  public_subnet_ids     = module.networking.public_subnet_ids
+  source                 = "../../modules/compute"
+  name                   = var.name
+  environment            = var.environment
+  vpc_id                 = module.networking.vpc_id
+  public_subnet_ids      = module.networking.public_subnet_ids
   private_app_subnet_ids = module.networking.private_app_subnet_ids
-  alb_security_group_id = module.security.alb_security_group_id
-  ecs_security_group_id = module.security.ecs_security_group_id
-  api_image             = var.api_image
-  web_image             = var.web_image
-  database_endpoint     = module.data.database_endpoint
-  redis_endpoint        = module.data.redis_primary_endpoint
-  opensearch_endpoint   = module.data.opensearch_endpoint
-  media_bucket_name     = module.data.media_bucket_name
-  tags                  = local.tags
+  alb_security_group_id  = module.security.alb_security_group_id
+  kms_key_arn            = module.security.kms_key_arn
+  ecs_security_group_id  = module.security.ecs_security_group_id
+  api_image              = var.api_image
+  web_image              = var.web_image
+  database_endpoint      = module.data.database_endpoint
+  redis_endpoint         = module.data.redis_primary_endpoint
+  opensearch_endpoint    = module.data.opensearch_endpoint
+  media_bucket_name      = module.data.media_bucket_name
+  tags                   = local.tags
 }
 
 module "realtime" {

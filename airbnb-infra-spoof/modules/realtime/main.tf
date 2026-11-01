@@ -26,9 +26,9 @@ resource "aws_sns_topic" "booking_events" {
 }
 
 resource "aws_iam_role" "lambda" {
-  name = "${var.name}-${var.environment}-realtime-lambda"
+  name               = "${var.name}-${var.environment}-realtime-lambda"
   assume_role_policy = jsonencode({ Version = "2012-10-17", Statement = [{ Action = "sts:AssumeRole", Effect = "Allow", Principal = { Service = "lambda.amazonaws.com" } }] })
-  tags = local.common_tags
+  tags               = local.common_tags
 }
 
 resource "aws_iam_role_policy_attachment" "basic" {
@@ -42,9 +42,9 @@ resource "aws_iam_role_policy_attachment" "vpc" {
 }
 
 resource "aws_iam_role_policy" "realtime" {
-  name = "${var.name}-${var.environment}-realtime"
-  role = aws_iam_role.lambda.id
-  policy = jsonencode({ Version = "2012-10-17", Statement = [{ Effect = "Allow", Action = ["dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:Query", "dynamodb:Scan", "dynamodb:UpdateItem"], Resource = aws_dynamodb_table.connections.arn }, { Effect = "Allow", Action = ["sns:Publish"], Resource = aws_sns_topic.booking_events.arn }, { Effect = "Allow", Action = ["execute-api:ManageConnections"], Resource = "*" }] })
+  name   = "${var.name}-${var.environment}-realtime"
+  role   = aws_iam_role.lambda.id
+  policy = jsonencode({ Version = "2012-10-17", Statement = [{ Effect = "Allow", Action = ["dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:Query", "dynamodb:Scan", "dynamodb:UpdateItem"], Resource = aws_dynamodb_table.connections.arn }, { Effect = "Allow", Action = ["sns:Publish"], Resource = aws_sns_topic.booking_events.arn }, { Effect = "Allow", Action = ["execute-api:ManageConnections"], Resource = "${aws_apigatewayv2_api.websocket.execution_arn}/*/POST/@connections/*" }] })
 }
 
 resource "aws_lambda_function" "websocket" {
@@ -63,7 +63,7 @@ resource "aws_lambda_function" "websocket" {
   }
   environment {
     variables = {
-      CONNECTIONS_TABLE       = aws_dynamodb_table.connections.name
+      CONNECTIONS_TABLE        = aws_dynamodb_table.connections.name
       BOOKING_EVENTS_TOPIC_ARN = aws_sns_topic.booking_events.arn
     }
   }

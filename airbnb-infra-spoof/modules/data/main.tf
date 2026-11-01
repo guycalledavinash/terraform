@@ -13,24 +13,25 @@ resource "aws_db_subnet_group" "this" {
 }
 
 resource "aws_db_instance" "postgres" {
-  identifier                 = "${var.name}-${var.environment}-postgres"
-  engine                     = "postgres"
-  engine_version             = "16.3"
-  instance_class             = var.db_instance_class
-  allocated_storage          = 50
-  max_allocated_storage      = 500
-  storage_encrypted          = true
-  kms_key_id                 = var.kms_key_arn
-  db_name                    = "airbnb"
-  username                   = var.db_username
-  password                   = var.db_password
-  db_subnet_group_name       = aws_db_subnet_group.this.name
-  vpc_security_group_ids     = [var.database_security_group_id]
-  backup_retention_period    = 7
-  deletion_protection        = false
-  skip_final_snapshot        = true
-  performance_insights_enabled = true
-  tags                       = local.common_tags
+  identifier                      = "${var.name}-${var.environment}-postgres"
+  engine                          = "postgres"
+  engine_version                  = "16.3"
+  instance_class                  = var.db_instance_class
+  allocated_storage               = 50
+  max_allocated_storage           = 500
+  storage_encrypted               = true
+  kms_key_id                      = var.kms_key_arn
+  db_name                         = "airbnb"
+  username                        = var.db_username
+  password                        = var.db_password
+  db_subnet_group_name            = aws_db_subnet_group.this.name
+  vpc_security_group_ids          = [var.database_security_group_id]
+  backup_retention_period         = 7
+  deletion_protection             = false
+  skip_final_snapshot             = true
+  performance_insights_enabled    = true
+  performance_insights_kms_key_id = var.kms_key_arn
+  tags                            = local.common_tags
 }
 
 resource "aws_elasticache_subnet_group" "this" {
@@ -48,6 +49,7 @@ resource "aws_elasticache_replication_group" "redis" {
   multi_az_enabled           = true
   at_rest_encryption_enabled = true
   transit_encryption_enabled = true
+  kms_key_id                 = var.kms_key_arn
   subnet_group_name          = aws_elasticache_subnet_group.this.name
   security_group_ids         = [var.redis_security_group_id]
   tags                       = local.common_tags
@@ -58,8 +60,8 @@ resource "aws_opensearch_domain" "search" {
   engine_version = "OpenSearch_2.13"
 
   cluster_config {
-    instance_type  = var.opensearch_instance_type
-    instance_count = 2
+    instance_type          = var.opensearch_instance_type
+    instance_count         = 2
     zone_awareness_enabled = true
     zone_awareness_config {
       availability_zone_count = 2
@@ -93,6 +95,26 @@ resource "aws_opensearch_domain" "search" {
 resource "aws_s3_bucket" "media" {
   bucket_prefix = "${var.name}-${var.environment}-media-"
   tags          = local.common_tags
+}
+
+resource "aws_s3_bucket_versioning" "media" {
+  bucket = aws_s3_bucket.media.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "media" {
+  bucket = aws_s3_bucket.media.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = var.kms_key_arn
+    }
+    bucket_key_enabled = true
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "media" {
